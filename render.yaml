@@ -14,7 +14,7 @@ services:
     name: archadvisor-api
     runtime: python
     region: oregon
-    plan: free
+    plan: starter
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
@@ -40,7 +40,6 @@ services:
   - type: web
     name: archadvisor-frontend
     runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: yarn install && yarn build
     staticPublishPath: build
