@@ -121,6 +121,24 @@ class Document(BaseModel):
     content: Dict[str, Any]
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
+# New model for configurable prompts
+class AIPromptConfig(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    analysis_type: str
+    name: str
+    prompt_template: str
+    language: str = "both"  # fr, en, both
+    is_active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class AIPromptCreate(BaseModel):
+    analysis_type: str
+    name: str
+    prompt_template: str
+    language: str = "both"
+
 # ============== AI HELPER ==============
 
 SYSTEM_PROMPT = """Vous êtes un architecte de solutions TI expert avec 15+ ans d'expérience. 
@@ -292,10 +310,40 @@ async def analyze_architecture(request: AnalysisRequest):
         3. Patterns d'architecture (microservices, event-driven, etc.)
         4. Diagramme conceptuel (description textuelle)
         5. Phases d'implémentation
-        6. KPIs de succès"""
+        6. KPIs de succès""",
+        
+        "scoring": """Évaluez l'architecture suivante et attribuez un score sur 100 pour chaque catégorie:
+        
+        Description de l'architecture: {input_data}
+        
+        Catégories à évaluer (avec leur pondération):
+        - Scalabilité (20%): Capacité à supporter la croissance
+        - Sécurité (25%): Protection des données et conformité
+        - Coût-efficacité (15%): Optimisation des ressources
+        - Performance (20%): Temps de réponse et throughput
+        - Maintenabilité (10%): Facilité de maintenance et évolution
+        - Fiabilité (10%): Disponibilité et tolérance aux pannes
+        
+        Pour chaque catégorie, fournissez:
+        1. Score /100
+        2. Points forts
+        3. Points à améliorer
+        4. Recommandations concrètes
+        
+        Terminez par un score global pondéré et une conclusion."""
     }
     
-    prompt_template = analysis_prompts.get(request.analysis_type, analysis_prompts["recommendation"])
+    # Check for custom prompts in database
+    custom_prompt = await db.ai_prompts.find_one({
+        "analysis_type": request.analysis_type,
+        "is_active": True
+    }, {"_id": 0})
+    
+    if custom_prompt:
+        prompt_template = custom_prompt["prompt_template"]
+    else:
+        prompt_template = analysis_prompts.get(request.analysis_type, analysis_prompts["recommendation"])
+    
     prompt = prompt_template.format(input_data=str(request.input_data))
     
     ai_recommendation = await get_ai_recommendation(prompt)
@@ -869,6 +917,73 @@ async def get_stats():
             "analyses_this_week": analyses_count
         }
     }
+
+# ============== AI PROMPTS CONFIGURATION ==============
+
+@api_router.get("/ai-prompts")
+async def get_ai_prompts():
+    """Get all configurable AI prompts"""
+    prompts = await db.ai_prompts.find({}, {"_id": 0}).to_list(100)
+    
+    # Also return default prompts info
+    default_types = [
+        {"type": "cloud_choice", "name": "Choix Cloud", "description": "Analyse Cloud/On-Prem/Hybride"},
+        {"type": "tech_comparison", "name": "Comparaison Tech", "description": "Comparaison de technologies"},
+        {"type": "cost_estimation", "name": "Estimation Coûts", "description": "Analyse TCO et coûts"},
+        {"type": "risk_analysis", "name": "Analyse Risques", "description": "Risques sécurité et business"},
+        {"type": "recommendation", "name": "Recommandation", "description": "Recommandation d'architecture complète"},
+        {"type": "scoring", "name": "Scoring Architecture", "description": "Évaluation et notation d'architecture"}
+    ]
+    
+    return {
+        "custom_prompts": prompts,
+        "default_types": default_types
+    }
+
+@api_router.post("/ai-prompts", response_model=AIPromptConfig)
+async def create_ai_prompt(prompt: AIPromptCreate):
+    """Create a custom AI prompt"""
+    prompt_obj = AIPromptConfig(**prompt.model_dump())
+    doc = prompt_obj.model_dump()
+    await db.ai_prompts.insert_one(doc)
+    return prompt_obj
+
+@api_router.put("/ai-prompts/{prompt_id}")
+async def update_ai_prompt(prompt_id: str, prompt: AIPromptCreate):
+    """Update a custom AI prompt"""
+    existing = await db.ai_prompts.find_one({"id": prompt_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    
+    update_data = prompt.model_dump()
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.ai_prompts.update_one({"id": prompt_id}, {"$set": update_data})
+    
+    updated = await db.ai_prompts.find_one({"id": prompt_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/ai-prompts/{prompt_id}")
+async def delete_ai_prompt(prompt_id: str):
+    """Delete a custom AI prompt"""
+    result = await db.ai_prompts.delete_one({"id": prompt_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    return {"message": "Prompt deleted successfully"}
+
+@api_router.post("/ai-prompts/{prompt_id}/toggle")
+async def toggle_ai_prompt(prompt_id: str):
+    """Toggle active status of a prompt"""
+    existing = await db.ai_prompts.find_one({"id": prompt_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    
+    new_status = not existing.get("is_active", True)
+    await db.ai_prompts.update_one(
+        {"id": prompt_id}, 
+        {"$set": {"is_active": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"is_active": new_status}
 
 # Include router
 app.include_router(api_router)

@@ -13,6 +13,10 @@ import RiskAnalysis from "./pages/RiskAnalysis";
 import DiagramGenerator from "./pages/DiagramGenerator";
 import DocumentExport from "./pages/DocumentExport";
 import Templates from "./pages/Templates";
+import FrameworkDetails from "./pages/FrameworkDetails";
+import DiagramEditor from "./pages/DiagramEditor";
+import ArchitectureScoring from "./pages/ArchitectureScoring";
+import AnalysisHistory from "./pages/AnalysisHistory";
 import "./App.css";
 
 function App() {
@@ -32,8 +36,12 @@ function App() {
               <Route path="/cost-estimation/:id" element={<CostEstimation />} />
               <Route path="/risk-analysis/:id" element={<RiskAnalysis />} />
               <Route path="/diagrams/:id" element={<DiagramGenerator />} />
+              <Route path="/diagram-editor/:id" element={<DiagramEditor />} />
               <Route path="/documents/:id" element={<DocumentExport />} />
               <Route path="/templates" element={<Templates />} />
+              <Route path="/frameworks" element={<FrameworkDetails />} />
+              <Route path="/scoring/:id" element={<ArchitectureScoring />} />
+              <Route path="/history/:id" element={<AnalysisHistory />} />
             </Route>
           </Routes>
         </BrowserRouter>

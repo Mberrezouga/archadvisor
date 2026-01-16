@@ -203,7 +203,10 @@ const translations = {
       myDiagrams: "Mes Diagrammes",
       preview: "Prévisualisation",
       noDiagramSelected: "Aucun diagramme sélectionné",
-      selectDiagramPrompt: "Choisissez un type de diagramme et cliquez sur \"Template\" pour charger un modèle, ou utilisez \"IA\" pour générer automatiquement."
+      selectDiagramPrompt: "Choisissez un type de diagramme et cliquez sur \"Template\" pour charger un modèle, ou utilisez \"IA\" pour générer automatiquement.",
+      dragToMove: "Glisser pour déplacer",
+      ctrlScrollZoom: "Ctrl + Scroll pour zoomer",
+      resetView: "Réinitialiser la vue"
     },
     
     // Documents
@@ -495,7 +498,10 @@ const translations = {
       myDiagrams: "My Diagrams",
       preview: "Preview",
       noDiagramSelected: "No diagram selected",
-      selectDiagramPrompt: "Choose a diagram type and click \"Template\" to load a model, or use \"AI\" to generate automatically."
+      selectDiagramPrompt: "Choose a diagram type and click \"Template\" to load a model, or use \"AI\" to generate automatically.",
+      dragToMove: "Drag to move",
+      ctrlScrollZoom: "Ctrl + Scroll to zoom",
+      resetView: "Reset view"
     },
     
     // Documents

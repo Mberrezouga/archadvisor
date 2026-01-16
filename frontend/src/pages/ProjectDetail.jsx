@@ -13,7 +13,10 @@ import {
   Server,
   ArrowRight,
   Loader2,
-  Trash2
+  Trash2,
+  Star,
+  Pencil,
+  History
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -89,12 +92,36 @@ export default function ProjectDetail() {
       bgColor: "bg-indigo-400/10"
     },
     {
+      title: language === 'fr' ? 'Éditeur de Diagrammes' : 'Diagram Editor',
+      description: language === 'fr' ? 'Créez des diagrammes avec drag-and-drop' : 'Create diagrams with drag-and-drop',
+      href: `/diagram-editor/${id}`,
+      icon: Pencil,
+      color: "text-purple-400",
+      bgColor: "bg-purple-400/10"
+    },
+    {
+      title: language === 'fr' ? 'Scoring d\'Architecture' : 'Architecture Scoring',
+      description: language === 'fr' ? 'Évaluez la qualité de votre architecture' : 'Evaluate your architecture quality',
+      href: `/scoring/${id}`,
+      icon: Star,
+      color: "text-yellow-400",
+      bgColor: "bg-yellow-400/10"
+    },
+    {
       title: t.project.exportDocs,
       description: t.project.exportDocsDesc,
       href: `/documents/${id}`,
       icon: FileText,
       color: "text-pink-400",
       bgColor: "bg-pink-400/10"
+    },
+    {
+      title: language === 'fr' ? 'Historique' : 'History',
+      description: language === 'fr' ? 'Voir l\'historique des analyses' : 'View analysis history',
+      href: `/history/${id}`,
+      icon: History,
+      color: "text-slate-400",
+      bgColor: "bg-slate-400/10"
     }
   ];
 
