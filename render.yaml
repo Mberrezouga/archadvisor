@@ -1,13 +1,11 @@
-# render.yaml - Configuration simplifiée ArchAdvisor
-# Backend Python + Frontend Static
+# render.yaml - Configuration ArchAdvisor
 
 services:
   # ===== BACKEND API =====
   - type: web
     name: archadvisor-api
     runtime: python
-    region: oregon
-    plan: free
+    plan: starter
     rootDir: backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn server:app --host 0.0.0.0 --port $PORT"
@@ -29,8 +27,6 @@ services:
   - type: web
     name: archadvisor-app
     runtime: static
-    region: oregon
-    plan: free
     rootDir: frontend
     buildCommand: "yarn install && yarn build"
     staticPublishPath: build
