@@ -1,12 +1,5 @@
-# render.yaml - Blueprint Complet ArchAdvisor
-# Inclut: Frontend + Backend + MongoDB (tout gratuit)
-
-databases:
-  # ===== BASE DE DONNÉES MONGODB =====
-  - name: archadvisor-db
-    plan: free
-    databaseName: archadvisor
-    user: archadvisor
+# render.yaml - Configuration simplifiée ArchAdvisor
+# Backend Python + Frontend Static
 
 services:
   # ===== BACKEND API =====
@@ -16,21 +9,17 @@ services:
     region: oregon
     plan: free
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn server:app --host 0.0.0.0 --port $PORT"
     envVars:
-      # MongoDB - Connexion automatique à la DB créée ci-dessus
       - key: MONGO_URL
-        fromDatabase:
-          name: archadvisor-db
-          property: connectionString
+        sync: false
       - key: DB_NAME
         value: archadvisor
-      - key: CORS_ORIGINS
-        value: "*"
-      # Clé IA Groq (GRATUITE) - À configurer manuellement
       - key: GROQ_API_KEY
         sync: false
+      - key: CORS_ORIGINS
+        value: "*"
       - key: PYTHON_VERSION
         value: "3.11.0"
     healthCheckPath: /api/
@@ -38,23 +27,16 @@ services:
 
   # ===== FRONTEND STATIC =====
   - type: web
-    name: archadvisor-frontend
+    name: archadvisor-app
     runtime: static
     region: oregon
     plan: free
     rootDir: frontend
-    buildCommand: yarn install && yarn build
+    buildCommand: "yarn install && yarn build"
     staticPublishPath: build
     envVars:
       - key: REACT_APP_BACKEND_URL
-        fromService:
-          type: web
-          name: archadvisor-api
-          property: host
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache
+        sync: false
     routes:
       - type: rewrite
         source: /*
