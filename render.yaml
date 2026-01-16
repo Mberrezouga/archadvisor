@@ -40,7 +40,6 @@ services:
   - type: web
     name: archadvisor-frontend
     runtime: static
-    region: oregon
     plan: free
     rootDir: frontend
     buildCommand: yarn install && yarn build
