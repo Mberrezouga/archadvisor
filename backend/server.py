@@ -46,13 +46,23 @@ logging.info(f"AI Provider configured: {AI_PROVIDER or 'None (AI features disabl
 
 app = FastAPI(title="ArchAdvisor API", version="1.0.0")
 
-# CORS - Must be added before routes
+# Configuration CORS - Autoriser toutes les origines
+origins = [
+    "https://archadvisor.onrender.com",
+    "https://archadvisor-api.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "*"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 api_router = APIRouter(prefix="/api")
