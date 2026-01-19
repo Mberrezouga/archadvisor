@@ -26,9 +26,26 @@ except ImportError:
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
+# MongoDB connection with SSL fix for Python 3.13
 mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-client = AsyncIOMotorClient(mongo_url)
+
+# Add SSL parameters if using MongoDB Atlas (mongodb+srv)
+if 'mongodb+srv' in mongo_url or 'mongodb.net' in mongo_url:
+    # Fix SSL issues with Python 3.13
+    if '?' in mongo_url:
+        if 'tls=' not in mongo_url and 'ssl=' not in mongo_url:
+            mongo_url += '&tls=true&tlsAllowInvalidCertificates=true'
+    else:
+        mongo_url += '?tls=true&tlsAllowInvalidCertificates=true'
+
+client = AsyncIOMotorClient(
+    mongo_url,
+    serverSelectionTimeoutMS=5000,
+    connectTimeoutMS=10000,
+    socketTimeoutMS=10000,
+    tls=True,
+    tlsAllowInvalidCertificates=True
+)
 db = client[os.environ.get('DB_NAME', 'archadvisor')]
 
 # LLM Configuration - Priority: Groq (free) > Emergent > None
@@ -46,10 +63,10 @@ logging.info(f"AI Provider configured: {AI_PROVIDER or 'None (AI features disabl
 
 app = FastAPI(title="ArchAdvisor API", version="1.0.0")
 
-# Configuration CORS - Autoriser toutes les origines
+# CORS Configuration - Allow all origins
 origins = [
     "https://archadvisor.onrender.com",
-    "https://archadvisor-api.onrender.com",
+    "https://archadvisor-app.onrender.com",
     "http://localhost:3000",
     "http://localhost:8000",
     "*"
