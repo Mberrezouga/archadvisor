@@ -15,7 +15,6 @@ Application d'aide à la décision pour architectes de solutions TI.
 ```
 MONGO_URL = votre_url_mongodb_atlas
 DB_NAME = archadvisor
-GROQ_API_KEY = votre_cle_groq (optionnel)
 ```
 
 **Variable Frontend :**
@@ -46,7 +45,6 @@ REACT_APP_BACKEND_URL = https://votre-backend.onrender.com
 - **Frontend** : React, TailwindCSS, Shadcn/UI
 - **Backend** : FastAPI, Python
 - **Database** : MongoDB Atlas
-- **IA** : Groq (gratuit)
 
 ---
 
