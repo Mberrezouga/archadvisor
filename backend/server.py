@@ -45,6 +45,16 @@ elif EMERGENT_LLM_KEY and EMERGENT_AVAILABLE:
 logging.info(f"AI Provider configured: {AI_PROVIDER or 'None (AI features disabled)'}")
 
 app = FastAPI(title="ArchAdvisor API", version="1.0.0")
+
+# CORS - Must be added before routes
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 api_router = APIRouter(prefix="/api")
 
 # ============== MODELS ==============
@@ -987,14 +997,6 @@ async def toggle_ai_prompt(prompt_id: str):
 
 # Include router
 app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 logging.basicConfig(
     level=logging.INFO,
